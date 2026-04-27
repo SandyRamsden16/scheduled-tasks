@@ -6,33 +6,37 @@
 # See the solution video in the 100 Days of Python Course for explainations.
 
 
-from datetime import datetime
+import datetime as dt
 import pandas
 import random
 import smtplib
-import os
 
-# import os and use it to get the Github repository secrets
-MY_EMAIL = os.environ.get("MY_EMAIL")
-MY_PASSWORD = os.environ.get("MY_PASSWORD")
+now = dt.datetime.now()
+today_month = now.month
+today_day = now.day
+today = (today_month, today_day)
 
-today = datetime.now()
-today_tuple = (today.month, today.day)
+MY_EMAIL = "sandy16ramsden@gmail.com" # password is "@Becker6Robbo!"
+MY_PASSWORD = "gjdv wlgz tana ykuu"
 
-data = pandas.read_csv("birthdays.csv")
-birthdays_dict = {(data_row["month"], data_row["day"])                  : data_row for (index, data_row) in data.iterrows()}
-if today_tuple in birthdays_dict:
-    birthday_person = birthdays_dict[today_tuple]
-    file_path = f"letter_templates/letter_{random.randint(1, 3)}.txt"
-    with open(file_path) as letter_file:
-        contents = letter_file.read()
-        contents = contents.replace("[NAME]", birthday_person["name"])
+with open("birthdays.csv") as dob_file:
+    birthdays_df = pandas.read_csv(dob_file)        # this is a pandas DataFrame
+    birthdays_dict = birthdays_df.to_dict(orient="records")
+    for i in range(0, len(birthdays_dict)):
+        birth_month = birthdays_dict[i]['month']
+        birth_day = birthdays_dict[i]['day']
 
-    with smtplib.SMTP("YOUR EMAIL PROVIDER SMTP SERVER ADDRESS") as connection:
-        connection.starttls()
-        connection.login(MY_EMAIL, MY_PASSWORD)
-        connection.sendmail(
-            from_addr=MY_EMAIL,
-            to_addrs=birthday_person["email"],
-            msg=f"Subject:Happy Birthday!\n\n{contents}"
-        )
+        if birth_month == today_month and birth_day == today_day:
+            letter_number = random.randint(1, 3)
+
+            with open(f"./letter_templates/letter_{letter_number}.txt") as letter_file:
+                draft_text = letter_file.read()
+                final_text = draft_text.replace("[NAME]", birthdays_dict[i]['name'])
+                email = birthdays_dict[i]['email']
+
+                with smtplib.SMTP("smtp.gmail.com") as connection:
+                    connection.starttls()
+                    connection.login(user=MY_EMAIL, password=MY_PASSWORD)
+                    connection.sendmail(from_addr=MY_EMAIL,
+                                        to_addrs=email,
+                                        msg=f"Subject: Happy Birthday!\n\n{final_text}")
