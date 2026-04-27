@@ -10,14 +10,15 @@ import datetime as dt
 import pandas
 import random
 import smtplib
+import os
 
 now = dt.datetime.now()
 today_month = now.month
 today_day = now.day
 today = (today_month, today_day)
 
-MY_EMAIL = "sandy16ramsden@gmail.com" # password is "@Becker6Robbo!"
-MY_PASSWORD = "gjdv wlgz tana ykuu"
+MY_EMAIL = os.environ.get("MY_EMAIL")
+MY_PASSWORD = os.environ.get("MY_PASSWORD")
 
 with open("birthdays.csv") as dob_file:
     birthdays_df = pandas.read_csv(dob_file)        # this is a pandas DataFrame
